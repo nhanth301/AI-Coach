@@ -1,0 +1,8 @@
+langchain
+langgraph
+langchain-google-genai
+langchain-community
+python-dotenv
+requests
+beautifulsoup4
+pypdf

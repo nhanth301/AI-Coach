@@ -1,6 +1,17 @@
 from langchain_core.tools import BaseTool
-from langchain_community.tools import DuckDuckGoSearchResults
+from googlesearch import search
+import requests
+from bs4 import BeautifulSoup
 
+
+def google_scrape(url):
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+    except:
+        return None
+    soup = BeautifulSoup(response.content, "html.parser")
+    return soup.title.text if soup.title is not None else None
 
 class Web_Searcher_Tool(BaseTool):
     """A tool for searching the web using DuckDuckGo."""
@@ -9,6 +20,14 @@ class Web_Searcher_Tool(BaseTool):
     
     def _run(self, query: str):
         """Use the tool."""
-        searcher = DuckDuckGoSearchResults(output_format="list", num_results=3)
-        return searcher.invoke(query)
+        done = 0
+        results = []
+        for url in search(query, num_results=100):
+            res = google_scrape(url)
+            if res:
+                results.append({'url': url, 'title': res})
+                done += 1
+            if done == 3:
+                break
+        return results
 

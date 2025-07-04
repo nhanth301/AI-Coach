@@ -18,7 +18,7 @@ class Arxiv_Search_Tool(BaseTool):
     )
 
 
-    def _run(self, query: str, max_results: int = 5) -> List[Dict[str, Any]]:
+    def _run(self, query: str, search_type: str,max_results: int = 3) -> List[Dict[str, Any]]:
         """Use the tool."""
         page_size = 25 
         base_url = "https://arxiv.org/search/"
@@ -29,7 +29,7 @@ class Arxiv_Search_Tool(BaseTool):
 
         while len(results) < clamped_max_results:
             params = {
-                "searchtype": "title",
+                "searchtype": search_type,
                 "query": query,
                 "abstracts": "show",
                 "order": "-announced_date_first",
@@ -39,7 +39,7 @@ class Arxiv_Search_Tool(BaseTool):
 
             try:
                 response = requests.get(base_url, params=params)
-                response.raise_for_status() # Kiểm tra lỗi HTTP
+                response.raise_for_status() 
                 soup = BeautifulSoup(response.content, 'html.parser')
 
                 papers = soup.find_all("li", class_="arxiv-result")
