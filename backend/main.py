@@ -1,61 +1,27 @@
-import json
-import asyncio
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse
+import os
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
-from src.agent.graph import create_graph
+# Import the router object from your new endpoints file
+from src.api.endpoints import router as api_router
 
-app = FastAPI()
+app = FastAPI(title="AI-Coach Backend")
 
-with open("index.html", "r", encoding="utf-8") as f:
-    html_content = f.read()
+# Include the API router. All routes defined in it (like /ws) are now part of the main app.
+app.include_router(api_router)
 
-STEP_DESCRIPTIONS = {
-    "rewrite_query": "✍️ Optimizing query...",
-    "retrieve_from_db": "🔎 Searching internal knowledge base...",
-    "grade_documents": "⚖️ Grading document relevance...", 
-    "final_results": "✅ Preparing final answer...", 
-    "router": "🧭 Analyzing and routing for external search...",
-    "web_search": "🌐 Searching the web...",
-    "arxiv_search": "🔬 Searching ArXiv...",
-    "setup_loop": "⚙️ Preparing to process new information...",
-    "summarize_item": "📄 Summarizing new information...",
-    "add_to_db": "💾 Saving new information to database...",
-}
+# --- STATIC FILE SERVING ---
+# This part is for serving the built React app in a production environment.
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+# In production, Vite builds to a 'dist' folder.
+FRONTEND_DIR = os.path.join(PROJECT_ROOT, "frontend", "dist")
+
+# Mount the static assets directory from the build output
+app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_DIR, "assets")), name="assets")
 
 @app.get("/")
-async def get():
-    return HTMLResponse(html_content)
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    langgraph_app = create_graph()
-
-    try:
-        query_data = await websocket.receive_text()
-        inputs = {"user_query": query_data}
-
-        async for event in langgraph_app.astream_events(inputs, version="v1"):
-            kind = event["event"]
-            
-
-            if kind == "on_chain_start":
-                node_name = event["name"]
-                if node_name in STEP_DESCRIPTIONS:
-                    step_message = STEP_DESCRIPTIONS[node_name]
-                    await websocket.send_json({"type": "step", "message": step_message})
-                    await asyncio.sleep(0.5) 
-
-            if kind == "on_chain_end" and event["name"] == "LangGraph":
-                print(event)
-                final_result = event["data"]["output"]
-                await websocket.send_json({"type": "result", "data": final_result})
-
-    except WebSocketDisconnect:
-        print("Client disconnected")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        await websocket.send_json({"type": "error", "message": str(e)})
-    finally:
-        await websocket.close()
+async def read_index():
+    """Serves the main index.html file from the frontend build folder."""
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))

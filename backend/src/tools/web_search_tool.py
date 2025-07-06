@@ -27,7 +27,7 @@ class Web_Searcher_Tool(BaseTool):
             if res:
                 results.append({'url': url, 'title': res})
                 done += 1
-            if done == 3:
+            if done == 5:
                 break
         return results
 

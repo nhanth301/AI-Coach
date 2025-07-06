@@ -18,7 +18,7 @@ class Arxiv_Search_Tool(BaseTool):
     )
 
 
-    def _run(self, query: str, search_type: str,max_results: int = 3) -> List[Dict[str, Any]]:
+    def _run(self, query: str, search_type: str,max_results: int = 5) -> List[Dict[str, Any]]:
         """Use the tool."""
         page_size = 25 
         base_url = "https://arxiv.org/search/"

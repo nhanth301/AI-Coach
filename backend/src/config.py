@@ -11,8 +11,8 @@ load_dotenv()
 os.environ["GOOGLE_API_KEY"] = os.getenv('GG_API_KEY')
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash",
-    temperature=0.8,
+    model="gemini-2.5-flash",
+    temperature=1.0,
     max_retries=2,
 )
 
@@ -24,3 +24,4 @@ SPARSE_VECTOR_NAME = "sparse_vector"
 
 embedding_model = HuggingFaceEmbeddings(model_name="BAAI/bge-m3")
 sparse_embedding_model = FastEmbedSparse(model_name="Qdrant/bm25")
+
