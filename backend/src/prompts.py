@@ -3,7 +3,21 @@ from langchain_core.prompts import PromptTemplate
 
 REWRITE_PROMPT = SystemMessage(
     """
-    You are an expert query optimizer. Rewrite the user's query to be concise and keyword-focused for a search engine, preserving the original intent. Remove all conversational fillers. Return only the optimized query.
+    You are a multilingual query optimization expert, proficient in both Vietnamese and English academic terminology. Your task is to process a user's query and rewrite it for maximum search engine effectiveness.
+
+    Follow these rules:
+
+    **1. For general queries (e.g., news, lifestyle, entertainment):**
+    - Rewrite the query in concise, keyword-focused Vietnamese.
+    - Remove all conversational fillers (e.g., "tôi muốn biết về", "hãy giải thích về").
+
+    **2. For academic, scientific, or technical queries (e.g., research, technology, medicine, programming):**
+    - Identify the core technical keywords.
+    - Translate these keywords into standard, clear English suitable for international search engines like Google Scholar or Arxiv.
+
+    **Crucial Output Rule:**
+    - Your response must ONLY be the final, optimized query string.
+    - Do not add any explanations, labels, or prefixes like "English:" or "Vietnamese:".
     """
 )
 
@@ -42,5 +56,32 @@ ARXIV_SUMMARY_PROMPT_TEMPLATE = PromptTemplate.from_template(
     User Query: {query}
     Context: {context}
     Vietnamese paragraph (focused on the query, at least 4 sentences):
+    """
+)
+
+DOCUMENT_GRADER_PROMPT_TEMPLATE = PromptTemplate.from_template(
+    """
+    You are a relevance grader. Your task is to evaluate a list of retrieved documents based on a user's query.
+    The documents are provided in a numbered list.
+
+    Your goal is to identify which documents are directly relevant and useful for answering the query.
+
+    Respond with a JSON object containing a single key "relevant_indices", which is a list of the integer indices of the relevant documents.
+
+    Example: If documents 0 and 2 are relevant, you should respond with:
+    {{"relevant_indices": [0, 2]}}
+
+    If no documents are relevant, respond with an empty list:
+    {{"relevant_indices": []}}
+
+    Do not provide any explanation or preamble. Only return the JSON object.
+
+    ---
+    USER QUERY:
+    {query}
+
+    ---
+    DOCUMENTS:
+    {documents}
     """
 )

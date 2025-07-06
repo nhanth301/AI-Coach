@@ -1,4 +1,5 @@
 from typing import TypedDict, List
+from langchain_core.documents import Document
 
 class GraphState(TypedDict):
     """
@@ -9,8 +10,11 @@ class GraphState(TypedDict):
     routing_decision: dict
     web_search_results: dict
     arxiv_search_results: dict
-    processed_web_results: List[str]
-    processed_arxiv_results: List[str]
+    processed_results: List[str]
+    db_add_status: str | None
+    retrieved_documents: List[Document]
+    relevant_doc_ids: List[str] | None
+    final_results: List[str]
 
 class GraphInput(TypedDict):
     """
@@ -25,6 +29,4 @@ class GraphOutput(TypedDict):
     """
     user_query: str
     rewritten_query: str
-    routing_decision: dict
-    processed_web_results: List[str]
-    processed_arxiv_results: List[str]
+    final_results: List[str]

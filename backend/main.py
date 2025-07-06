@@ -12,11 +12,15 @@ with open("index.html", "r", encoding="utf-8") as f:
 
 STEP_DESCRIPTIONS = {
     "rewrite_query": "✍️ Optimizing query...",
-    "router": "🧭 Analyzing and routing...",
+    "retrieve_from_db": "🔎 Searching internal knowledge base...",
+    "grade_documents": "⚖️ Grading document relevance...", 
+    "final_results": "✅ Preparing final answer...", 
+    "router": "🧭 Analyzing and routing for external search...",
     "web_search": "🌐 Searching the web...",
     "arxiv_search": "🔬 Searching ArXiv...",
-    "process_web_results": "📄 Processing and summarizing web results...",
-    "process_arxiv_results": "📚 Processing and summarizing scientific documents...",
+    "setup_loop": "⚙️ Preparing to process new information...",
+    "summarize_item": "📄 Summarizing new information...",
+    "add_to_db": "💾 Saving new information to database...",
 }
 
 @app.get("/")
@@ -44,6 +48,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     await asyncio.sleep(0.5) 
 
             if kind == "on_chain_end" and event["name"] == "LangGraph":
+                print(event)
                 final_result = event["data"]["output"]
                 await websocket.send_json({"type": "result", "data": final_result})
 
