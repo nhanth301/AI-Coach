@@ -2,7 +2,12 @@ import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from ..agent.graph import create_graph
-from ..prompts import STEP_DESCRIPTIONS
+from ..prompts import STEP_DESCRIPTIONS, TRANSLATION_FEEDBACK_PROMPT
+
+from ..schemas import TranslationFeedbackRequest, TranslationFeedbackResponse, Feedback
+from ..config import llm
+from langchain_core.output_parsers import JsonOutputParser
+
 
 router = APIRouter()
 
@@ -35,3 +40,22 @@ async def websocket_endpoint(websocket: WebSocket):
         await websocket.send_json({"type": "error", "message": str(e)})
     finally:
         await websocket.close()
+
+@router.post("/feedback", response_model=TranslationFeedbackResponse)
+async def get_translation_feedback(request: TranslationFeedbackRequest):
+    """
+    Receives text and a user's translation, and returns structured feedback from an LLM.
+    """
+    print(f"Received feedback request for sentence: '{request.current_sentence}'")
+
+    # Create a chain that pipes the prompt to the LLM and then to a JSON parser
+    parser = JsonOutputParser(pydantic_object=Feedback)
+    chain = TRANSLATION_FEEDBACK_PROMPT | llm | parser
+
+    feedback_result = await chain.ainvoke({
+        "original_passage": request.original_passage,
+        "current_sentence": request.current_sentence,
+        "user_translation": request.user_translation
+    })
+
+    return TranslationFeedbackResponse(feedback_data=feedback_result)

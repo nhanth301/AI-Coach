@@ -5,12 +5,20 @@ from fastapi.responses import FileResponse
 
 # Import the router object from your new endpoints file
 from src.api.endpoints import router as api_router
-
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title="AI-Coach Backend")
 
 # Include the API router. All routes defined in it (like /ws) are now part of the main app.
-app.include_router(api_router)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # The origin of your React frontend
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
+
+app.include_router(api_router)
 # --- STATIC FILE SERVING ---
 # This part is for serving the built React app in a production environment.
 

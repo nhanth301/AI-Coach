@@ -37,7 +37,7 @@ def retrieve_from_db_node(state: GraphState) -> dict:
     query = state["rewritten_query"]
     qdrant_store = get_qdrant_store()
     
-    found_docs = qdrant_store.similarity_search(query=query, k=5)
+    found_docs = qdrant_store.similarity_search(query=query, k=3)
     return {"retrieved_documents": found_docs}
 
 def grade_retrieved_documents_node(state: GraphState) -> dict:
@@ -145,7 +145,7 @@ def process_arxiv_results_node(state: GraphState) -> dict:
         pdf_url = result['link'].replace('abs', 'pdf')
         try:
             loader = PyPDFLoader(pdf_url)
-            docs = loader.load()[:7]
+            docs = loader.load()[:5]
             context = " ".join([doc.page_content for doc in docs])
             prompt = ARXIV_SUMMARY_PROMPT_TEMPLATE.invoke({'context': context, 'query': user_query})
             summary = llm.invoke(prompt).content

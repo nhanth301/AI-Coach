@@ -1,5 +1,6 @@
 from typing import TypedDict, List
 from langchain_core.documents import Document
+from pydantic import BaseModel, Field
 
 class GraphState(TypedDict):
     """
@@ -30,3 +31,25 @@ class GraphOutput(TypedDict):
     user_query: str
     rewritten_query: str
     final_results: List[str]
+
+
+class TranslationFeedbackRequest(BaseModel):
+    """The data sent from the frontend to the feedback API."""
+    original_passage: str = Field(..., description="The full original Vietnamese passage for context.")
+    current_sentence: str = Field(..., description="The specific Vietnamese sentence the user is currently translating.")
+    user_translation: str = Field(..., description="The user's English translation of the current sentence.")
+
+class CategorizedFeedback(BaseModel):
+    grammar: str = Field(..., description="Feedback on grammar and sentence structure.")
+    vocabulary: str = Field(..., description="Feedback on word choice and vocabulary.")
+    nuance: str = Field(..., description="Feedback on tone, style, and nuance.")
+
+class Feedback(BaseModel):
+    """The structured feedback object returned by the LLM."""
+    score: int = Field(..., ge=0, le=100)
+    categorized_feedback: CategorizedFeedback
+    suggestions: List[str] = Field(..., description="A list of improved or alternative English translations.")
+
+class TranslationFeedbackResponse(BaseModel):
+    """The final response sent back to the frontend."""
+    feedback_data: Feedback
