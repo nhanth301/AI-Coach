@@ -2,6 +2,10 @@
 
 An intelligent agent that researches topics, learns from new information, and helps you improve your English writing through translation practice.
 
+![image](imgs/demo.jpeg)
+
+![image](imgs/demo2.jpeg)
+
 ![image](imgs/flow.png)
 
 
