@@ -48,7 +48,6 @@ async def get_translation_feedback(request: TranslationFeedbackRequest):
     """
     print(f"Received feedback request for sentence: '{request.current_sentence}'")
 
-    # Create a chain that pipes the prompt to the LLM and then to a JSON parser
     parser = JsonOutputParser(pydantic_object=Feedback)
     chain = TRANSLATION_FEEDBACK_PROMPT | llm | parser
 
